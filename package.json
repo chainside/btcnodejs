@@ -1,8 +1,8 @@
 {
   "name": "btcnodejs",
-  "version": "0.0.1",
+  "version": "0.1",
   "description": "Nodejs bitcoin library which provides tools to handle Bitcoin data structures in a simple fashion",
-  "main": "index.js",
+  "main": "./lib/index.js",
   "directories": {
     "lib": "lib",
     "test": "test"
@@ -29,6 +29,10 @@
   "devDependencies": {
     "mocha": "^3.5.3"
   },
+
+  "files": [
+     "lib"
+   ],
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha test/test.js"
   },
@@ -41,7 +45,7 @@
     "btc"
   ],
   "author": "Francesco Andreozzi",
-  "license": "ISC",
+  "license": "LGPLv3",
   "bugs": {
     "url": "https://github.com/chainside/btcjs/issues"
   },
