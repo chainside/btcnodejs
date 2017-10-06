@@ -1,15 +1,14 @@
 {
   "name": "btcnodejs",
   "version": "0.0.1",
-  "description":
-    "Nodejs bitcoin library which provides tools to handle Bitcoin data structures in a simple fashion",
+  "description": "Nodejs bitcoin library which provides tools to handle Bitcoin data structures in a simple fashion",
   "main": "index.js",
   "directories": {
     "lib": "lib",
     "test": "test"
   },
   "dependencies": {
-    "arraybuffer-to-buffer": "0.0.4",
+    "arraybuffer-to-buffer": "^0.0.4",
     "assert": "^1.4.1",
     "base58check": "^2.0.0",
     "binascii": "^0.0.1",
@@ -35,13 +34,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chainside/app-lib.git"
+    "url": "git+https://github.com/chainside/btcjs.git"
   },
-  "keywords": ["bitcoin", "nodejs", "javascript"],
+  "keywords": [
+    "bitcoin",
+    "btc"
+  ],
   "author": "Francesco Andreozzi",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/chainside/app-lib/issues"
+    "url": "https://github.com/chainside/btcjs/issues"
   },
-  "homepage": "https://github.com/chainside/app-lib#readme"
+  "homepage": "https://github.com/chainside/btcjs#readme"
 }
