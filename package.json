@@ -1,6 +1,6 @@
 {
   "name": "btcnodejs",
-  "version": "0.1",
+  "version": "0.1.0",
   "description": "Nodejs bitcoin library which provides tools to handle Bitcoin data structures in a simple fashion",
   "main": "./lib/index.js",
   "directories": {
@@ -29,10 +29,6 @@
   "devDependencies": {
     "mocha": "^3.5.3"
   },
-
-  "files": [
-     "lib"
-   ],
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha test/test.js"
   },
