@@ -448,7 +448,7 @@ Returns the hexadecimal representation of the ScriptPubKey
 
 #### static fromHex(hex)
 
-Returns a ScriptPubKey object from an hexadecimal string representing the body of the script. If the hex is representing an identifiable script, the fromHex() will return an instance of the specific ScriptPubKey. At the moment, identifiables scripts are P2pkh, P2sh, P2wpkhV0, P2wshV0
+Returns a ScriptPubKey object from an hexadecimal string representing the body of the script. If the hex is representing an identifiable script, the fromHex() will return an instance of the specific ScriptPubKey. At the moment, identifiables scripts are P2pkh, P2sh, P2wpkhV0, P2wshV0, MultiSig
 
 ```javascript
 const btcnodejs = require('btcnodejs')
@@ -480,7 +480,7 @@ btcnodejs.network.setup('testnet')
 const spk = ScriptPubKey.fromHex('76a9148b4912ec0496b5f759f3af5ab24d6f4779a52f9e88ac')
 const p2pkh_address = spk.toAddress()
 p2pkh_address.hash          // "029c09b86e1e4c3822bc71859af3300520d577c2"
-p2pkh_address.toBase58()    // "mtDRkyy3a65oNhATimSQFhRqU511buvVAT
+p2pkh_address.toBase58()    // "2MsV2GNkfjxPjsp9ux2vwxW5HYaZh1HDtXJ
 
 
  ```
@@ -584,7 +584,7 @@ RelativeTimelockScript object
 
 #### new RelativeTimelockScript(source)
 
-* **source : Array[Sequence object, ScriptPubKey object]**
+* **source : Array[ScriptPubKey object, Sequence object]**
 
 Returns a RelativeTimelockScript object
 

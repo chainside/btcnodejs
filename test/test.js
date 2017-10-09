@@ -1134,7 +1134,7 @@ const test_scripts = {
             "02c08786d63f78bd0a6777ffe9c978cf5899756cfc32bfad09a89e211aeb926242"
           )
         ),
-        5
+        new transaction.Sequence(5)
       ]),
       p2shHash: "b6ec775b130018247aa62797865071c354cc86eb"
     }
@@ -1148,7 +1148,7 @@ const test_scripts = {
             "02c08786d63f78bd0a6777ffe9c978cf5899756cfc32bfad09a89e211aeb926242"
           )
         ),
-        5
+        new transaction.Sequence(5)
       ],
       p2shHash: "a7553c4129f920da43f9621a62c98c1833d54be2"
     }
@@ -2542,6 +2542,7 @@ describe("Scripts", function() {
         const sc = new scripts.RelativeTimelockScript(
           test_scripts["relative_timelock"][i]["data"]
         );
+
         assert(sc instanceof scripts.RelativeTimelockScript);
         const p2sh = new scripts.P2shScript(sc);
         assert.equal(
@@ -2648,7 +2649,7 @@ describe("Scripts", function() {
         const locked_script = 0;
         const sequence = 1;
         assert.throws(
-          () => new scripts.IfElseScript([sequence, locked_script]),
+          () => new scripts.RelativeTimelockScript([sequence, locked_script]),
           Error,
           "Invalid objects provided to build a RelativeTimelockScript"
         );
