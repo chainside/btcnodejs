@@ -1,3 +1,9 @@
+<p>
+<img src="https://www.chainside.net/images/logo.png" alt="chainside" width="80">
+<br \><br \>
+developed with :heart: by <a href="https://www.chainside.net">chainside</a>
+</p>
+
 # btcnodejs
 
 `btcnodejs` is a Segwit-compliant bitcoin library which provides tools for managing bitcoin data structures. It is the NodeJS version of [btcpy](https://github.com/chainside/btcpy).
