@@ -304,7 +304,7 @@ Transaction Output object
 
 * **amount : Integer**
 
-* **scriptPubKey : scriptPubKey object**
+* **scriptPubKey : ScriptPubKey object**
 
 #### new Output(amount, scriptPubKey)
 
