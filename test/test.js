@@ -2300,7 +2300,7 @@ describe("Structs", function() {
         }
       }
     });
-    it("can compute the segwit digest  of its inputs", function() {
+    it("can compute the segwit digest of its inputs", function() {
       for (var i = 0; i < segwit_data.length; i++) {
         let unsigned = transaction.Transaction.fromHex(segwit_data[i]["unsigned_tx"]);
         for (var j = 0; j < segwit_data[i]["txins"].length; j++) {
@@ -2340,6 +2340,22 @@ describe("Structs", function() {
         const bh = BlockHeader.fromHex(blocks[i]["raw"]);
         assert.equal(bh.blockHash(), blocks[i]["hash"]);
       }
+    });
+  });
+
+  describe("Witness", function() {
+    it("can be created fromHexArray", function() {
+      let hexData = [
+        "3045022100ebeb625c62d618c097fb1d54fef8bd3f57698bac191adca0a552725e" +
+        "4f577afc022001814513b04c272c5c86c4a37dd55700be543dc5732db5176dce37" +
+        "7f954bd88401"
+        ,
+        "03f5b78846b3420430e455df568e4bee061827704c36163699544a0e60660fb7cb"
+      ]
+      let witness = new transaction.Witness(
+        hexData.map((hex) => new ByteBuffer.fromHex(hex))
+      );
+      assert.equal(witness.toHex(), transaction.Witness.fromHexArray(hexData).toHex());
     });
   });
 

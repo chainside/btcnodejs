@@ -338,6 +338,10 @@ Returns a ScriptSig object
 
 Returns the hexadecimal representation of the Witness object
 
+#### static fromHexArray([hex_wit_sig, hex_wit_pk])
+
+Returns a Witness object from an array of hexadecimal strings representing the siganture and the public key
+
 ## `btcnodejs.Sequence`
 
 Sequence object representing the sequence number of a transaction Input
