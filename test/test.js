@@ -1399,7 +1399,8 @@ const segwit_data = [
           "619c335025c7f4012e556c2a58b2506e30b8511b53ade95e" + "a316fd8c3286feb9"
         )
       }
-    ]
+    ],
+    txid: "3335ffae0df20c5407e8de12b49405c8e912371f00fe4132bfaf95ad49c40243"
   },
   {
     unsigned_tx:
@@ -1440,7 +1441,8 @@ const segwit_data = [
           "eb696a065ef48a2192da5b28b694f87544b30fae8327c451" + "0137a922f32c6dcf"
         )
       }
-    ]
+    ],
+    txid: "321a59707939041eeb0d524f34432c0c46ca3920f0964e6c23697581f176b6c0"
   }
 ];
 const hd_keys = [
@@ -2223,6 +2225,12 @@ describe("Structs", function() {
       for (var i = 0; i < transactions.length; i++) {
         const tx = transaction.Transaction.fromHex(transactions[i]["raw"]);
         assert.equal(transactions[i]["txid"], tx.txid);
+      }
+    });
+    it("can compute the segwit txid", function() {
+      for (var i = 0; i < segwit_data.length; i++) {
+        let tx = transaction.Transaction.fromHex(segwit_data[i]["unsigned_tx"]);
+        assert.equal(segwit_data[i]["txid"], tx.txid);
       }
     });
     it("can compute the hash of previous outputs", function() {
