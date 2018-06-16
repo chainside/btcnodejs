@@ -1,5 +1,6 @@
 "use strict";
 const BN = require("bn.js");
+const _ = require("lodash");
 
 function swapHex(value) {
     let s = value.toString(16);
@@ -12,7 +13,7 @@ function swapHex(value) {
 
 function numToBytes(num, bytes) {
     if (bytes === undefined) bytes = 8;
-    if (bytes == 0) return [];
+    if (bytes === 0) return [];
     else return [num % 256].concat(numToBytes(Math.floor(num / 256), bytes - 1));
 }
 
@@ -43,7 +44,12 @@ function bytesLen(num) {
 
 
 function hexToBinary(hex) {
-    return ("00000000" + (parseInt(hex, 16)).toString(2)).substr(-8);
+    return _.map(hex.match(/.{2}/g), chunk => hexByteToBinary(chunk)).join("");
+
+}
+
+function hexByteToBinary(hexByte) {
+    return ("00000000" + (parseInt(hexByte, 16)).toString(2)).substr(-8);
 }
 
 function bnmodexp(a, b, n) {

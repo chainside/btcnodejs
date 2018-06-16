@@ -1,0 +1,155 @@
+const transaction = require("../lib/transaction");
+const scripts = require("../lib/scripts");
+const crypto = require("../lib/crypto");
+module.exports = {
+    spk: {
+        p2pkh: [
+            {
+                hex: "76a9148b4912ec0496b5f759f3af5ab24d6f4779a52f9e88ac",
+                pubkey: "026263992eda6538202047f1514e0f6155a229c3d61b066807664e9ef73d406d95",
+                pubkeyhash: "8b4912ec0496b5f759f3af5ab24d6f4779a52f9e",
+                address: "mtDRkyy3a65oNhATimSQFhRqU511buvVAT",
+                p2shHash: "029c09b86e1e4c3822bc71859af3300520d577c2"
+            }
+        ],
+        p2sh: [
+            {
+                hex: "a914ed4a0e1af5316666499ec6f8a5a99bf4abaf754987",
+                scripthash: "ed4a0e1af5316666499ec6f8a5a99bf4abaf7549",
+                address: "2NEstrBkkLcEmXCrUxStQnY9dP9PRoHNmNk"
+            }
+        ],
+        multisig: [
+            {
+                hex:
+                "522102c08786d63f78bd0a6777ffe9c978cf5899756cfc32bfad09a89e211aeb92624221033e81519ecf373ea3a5c7e1c" +
+                "051b71a898fb3438c9550e274d980f147eb4d069d21036d568125a969dc78b963b494fa7ed5f20ee9c2f2fc2c57f86c5d" +
+                "f63089f2ed3a53ae",
+                data: [
+                    2,
+                    "02c08786d63f78bd0a6777ffe9c978cf5899756cfc32bfad09a89e211aeb926242",
+                    "033e81519ecf373ea3a5c7e1c051b71a898fb3438c9550e274d980f147eb4d069d",
+                    "036d568125a969dc78b963b494fa7ed5f20ee9c2f2fc2c57f86c5df63089f2ed3a",
+                    3
+                ],
+                p2shHash: "45cbbfbc9d78d3d26e464972e1ed0640e57baabc"
+            }
+        ],
+        if_else: [
+            {
+                hex:
+                "63522102c08786d63f78bd0a6777ffe9c978cf5899756cfc32bfad09a89e211aeb92624221033e81519ecf373ea3a5c7e1c" +
+                "051b71a898fb3438c9550e274d980f147eb4d069d21036d568125a969dc78b963b494fa7ed5f20ee9c2f2fc2c57f86c5df6" +
+                "3089f2ed3a53ae6755b27576a914f89873b36ea31cfbf4d2081db73147078460c61188ac68",
+                if_script: new scripts.MultiSigScript([
+                    2,
+                    crypto.Publickey.fromHex(
+                        "02c08786d63f78bd0a6777ffe9c978cf5899756cfc32bfad09a89e211aeb926242"
+                    ),
+                    crypto.Publickey.fromHex(
+                        "033e81519ecf373ea3a5c7e1c051b71a898fb3438c9550e274d980f147eb4d069d"
+                    ),
+                    crypto.Publickey.fromHex(
+                        "036d568125a969dc78b963b494fa7ed5f20ee9c2f2fc2c57f86c5df63089f2ed3a"
+                    ),
+                    3
+                ]),
+                else_script: new scripts.RelativeTimelockScript([
+                    new scripts.P2pkhScript(
+                        crypto.Publickey.fromHex(
+                            "02c08786d63f78bd0a6777ffe9c978cf5899756cfc32bfad09a89e211aeb926242"
+                        )
+                    ),
+                    new transaction.Sequence(5)
+                ]),
+                p2shHash: "b6ec775b130018247aa62797865071c354cc86eb"
+            }
+        ],
+        relative_timelock: [
+            {
+                hex: "55b27576a914f89873b36ea31cfbf4d2081db73147078460c61188ac",
+                data: [
+                    new scripts.P2pkhScript(
+                        crypto.Publickey.fromHex(
+                            "02c08786d63f78bd0a6777ffe9c978cf5899756cfc32bfad09a89e211aeb926242"
+                        )
+                    ),
+                    new transaction.Sequence(5)
+                ],
+                p2shHash: "a7553c4129f920da43f9621a62c98c1833d54be2"
+            }
+        ],
+        p2wpkh: [
+            {
+                hex: "0014f81b6a6cfaaf19dbd9e56b9cab2d8a457608ad8e",
+                hash: "4d09a2ea331cf46887c00a82122d4cc288a77c4480acf474073c178428efd3d4",
+                type: "p2wpkhv0"
+            }
+        ],
+        p2wsh: [
+            {
+                hex: "0020cdbf909e935c855d3e8d1b61aeb9c5e3c03ae8021b286839b1a72f2e48fdba70",
+                hash: "bec02ca04c990083b099f9e9d2a90e9498025f5061cfb3e3b3077aa4b60a484f",
+                type: "p2wshv0"
+            }
+        ]
+    },
+    sigs: [
+        {
+            asm:
+            "3045022100b7bf286e5f6ac6fa308e8876a8a59b289094851a26cf62c20abd174917eb7762022069b5269e584e4c76" +
+            "f207d1b789bff7171a663d795e49751c12cf07dceb2a94c701 024a0dcb0527c2751ea4dda3aa98f6eface16e978db" +
+            "a8062bcbed623f158c07691",
+            hex:
+            "483045022100b7bf286e5f6ac6fa308e8876a8a59b289094851a26cf62c20abd174917eb7762022069b5269e584e4c7" +
+            "6f207d1b789bff7171a663d795e49751c12cf07dceb2a94c70121024a0dcb0527c2751ea4dda3aa98f6eface16e978d" +
+            "ba8062bcbed623f158c07691",
+            witness_hex:
+            "02483045022100b7bf286e5f6ac6fa308e8876a8a59b289094851a26cf62c20abd174917eb7762022069b5269e584e4" +
+            "c76f207d1b789bff7171a663d795e49751c12cf07dceb2a94c70121024a0dcb0527c2751ea4dda3aa98f6eface16e97" +
+            "8dba8062bcbed623f158c07691"
+        },
+        {
+            asm:
+            "3045022100af246c27890c2bc07a0b7450d3d82509702a44a4defdff766355240b114ee2ac02207bb67b468452fa1b3" +
+            "25dd5583879f5c1412e0bb4dae1c2c96c7a408796ab76f101 02ab9e8575536a1e99604a158fc60fe2ebd1cb1839e91" +
+            "9b4ca42b8d050cfad71b2",
+            hex:
+            "483045022100af246c27890c2bc07a0b7450d3d82509702a44a4defdff766355240b114ee2ac02207bb67b468452fa1" +
+            "b325dd5583879f5c1412e0bb4dae1c2c96c7a408796ab76f1012102ab9e8575536a1e99604a158fc60fe2ebd1cb1839" +
+            "e919b4ca42b8d050cfad71b2",
+            witness_hex:
+            "02483045022100af246c27890c2bc07a0b7450d3d82509702a44a4defdff766355240b114ee2ac02207bb67b468452f" +
+            "a1b325dd5583879f5c1412e0bb4dae1c2c96c7a408796ab76f1012102ab9e8575536a1e99604a158fc60fe2ebd1cb18" +
+            "39e919b4ca42b8d050cfad71b2"
+        },
+        {
+            asm:
+            "304502210092a204c35e27ded55012b28b8f88192058d29fd8c455442eca025f74cb6a51a3022016b1b98397b6c1387" +
+            "126732c66300e75680d0896b64dcf4a6835f72435b0035001 02a32cf30511795881f432b38883a5793d00828430226" +
+            "d379d43ae2dbb603a8c9b",
+            hex:
+            "48304502210092a204c35e27ded55012b28b8f88192058d29fd8c455442eca025f74cb6a51a3022016b1b98397b6c13" +
+            "87126732c66300e75680d0896b64dcf4a6835f72435b00350012102a32cf30511795881f432b38883a5793d00828430" +
+            "226d379d43ae2dbb603a8c9b",
+            witness_hex:
+            "0248304502210092a204c35e27ded55012b28b8f88192058d29fd8c455442eca025f74cb6a51a3022016b1b98397b6c" +
+            "1387126732c66300e75680d0896b64dcf4a6835f72435b00350012102a32cf30511795881f432b38883a5793d008284" +
+            "30226d379d43ae2dbb603a8c9b"
+        },
+        {
+            asm:
+            "3045022100f3ecd6482fc71de2f84f876eea8ac8be4f9cf92f885f14e97283c46d97c7566302206ec0f71137c8ff101b" +
+            "2437441924726af39ff1db68f17238b4835c5214d5ad0d01 036451829b5a49f4909500ce18c4500bf16f9c4dd49c1be" +
+            "2e9c74d210a134514d7",
+            hex:
+            "483045022100f3ecd6482fc71de2f84f876eea8ac8be4f9cf92f885f14e97283c46d97c7566302206ec0f71137c8ff10" +
+            "1b2437441924726af39ff1db68f17238b4835c5214d5ad0d0121036451829b5a49f4909500ce18c4500bf16f9c4dd49c" +
+            "1be2e9c74d210a134514d7",
+            witness_hex:
+            "02483045022100f3ecd6482fc71de2f84f876eea8ac8be4f9cf92f885f14e97283c46d97c7566302206ec0f71137c8ff" +
+            "101b2437441924726af39ff1db68f17238b4835c5214d5ad0d0121036451829b5a49f4909500ce18c4500bf16f9c4dd4" +
+            "9c1be2e9c74d210a134514d7"
+        }
+    ]
+};
