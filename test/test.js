@@ -1303,6 +1303,14 @@ describe("Keys", function () {
                 assert.equal(signatures[i]["signature"], sig);
             }
         });
+        it("can verify a message signed using ecdsa on secp256k1", function () {
+            for (let i = 0; i < signatures.length; i++) {
+                const prk = crypto.Privatekey.fromHex(signatures[i]["key"]);
+                const pub = prk.getPublic();
+                const valid = pub.verify(signatures[i]["message"], signatures[i]["signature"]);
+                assert.equal(valid, true);
+            }
+        });
     });
     describe("Publickey", function () {
         it("can uncompress a compressed key", function () {
