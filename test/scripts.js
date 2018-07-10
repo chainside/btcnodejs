@@ -3,6 +3,22 @@ const scripts = require("../lib/scripts");
 const crypto = require("../lib/crypto");
 module.exports = {
     spk: {
+        p2pk: [
+            {
+                hex: "4104ea0d6650c8305f1213a89c65fc8f4343a5dac8e985c869e51d3aa02879b57c60cff49fcb99314d02dfc612d654e4333150ef61fa569c1c66415602cae387baf7ac",
+                pubkey: "04ea0d6650c8305f1213a89c65fc8f4343a5dac8e985c869e51d3aa02879b57c60cff49fcb99314d02dfc612d654e4333150ef61fa569c1c66415602cae387baf7",
+                p2shHash: "45f76843096c76fa9f80ad4f33bf6eae2772a8c0",
+                keytype: "uncompressed"
+            },
+            {
+                hex: "2103ea0d6650c8305f1213a89c65fc8f4343a5dac8e985c869e51d3aa02879b57c60ac",
+                pubkey: "03ea0d6650c8305f1213a89c65fc8f4343a5dac8e985c869e51d3aa02879b57c60",
+                p2shHash: "3fb94b381c0409f4f54e27b7b160cb8a8f951122",
+                keytype: "compressed"
+            },
+
+
+        ],
         p2pkh: [
             {
                 hex: "76a9148b4912ec0496b5f759f3af5ab24d6f4779a52f9e88ac",
@@ -79,18 +95,32 @@ module.exports = {
                 p2shHash: "a7553c4129f920da43f9621a62c98c1833d54be2"
             }
         ],
+        timelock: [
+            {
+                hex: "55b17576a914f89873b36ea31cfbf4d2081db73147078460c61188ac",
+                data: [
+                    new scripts.P2pkhScript(crypto.Publickey.fromHex(
+                        "02c08786d63f78bd0a6777ffe9c978cf5899756cfc32bfad09a89e211aeb926242"
+                    )),
+                    new transaction.Locktime(5)
+                ],
+                p2shHash: "e26f9ff6cc394c24689a2a6b8f9501ff4f80bfc6"
+            }
+        ],
         p2wpkh: [
             {
                 hex: "0014f81b6a6cfaaf19dbd9e56b9cab2d8a457608ad8e",
                 hash: "4d09a2ea331cf46887c00a82122d4cc288a77c4480acf474073c178428efd3d4",
-                type: "p2wpkhv0"
+                type: "p2wpkhv0",
+                address: "tb1qlqdk5m864uvahk09dww2ktv2g4mq3tvwl8wkcz"
             }
         ],
         p2wsh: [
             {
                 hex: "0020cdbf909e935c855d3e8d1b61aeb9c5e3c03ae8021b286839b1a72f2e48fdba70",
                 hash: "bec02ca04c990083b099f9e9d2a90e9498025f5061cfb3e3b3077aa4b60a484f",
-                type: "p2wshv0"
+                type: "p2wshv0",
+                address: "tb1qeklep85ntjz4605drds6aww9u0qr46qzrv5xswd35uhjuj8ahfcqlpvc8e"
             }
         ]
     },

@@ -28,6 +28,8 @@ const RtlSolver = solvers.RelativeTimelockSolver;
 const P2shSolver = solvers.P2shSolver;
 const P2wpkhV0Solver = solvers.P2wpkhV0Solver;
 const P2wshV0Solver = solvers.P2wshV0Solver;
+const P2pkSolver = solvers.P2pkSolver;
+
 net.setup("testnet");
 
 var receivingKeys = [
@@ -49,8 +51,7 @@ var sighashes = [
     new Sighash("SINGLE", true)];
 
 const SATOSHIS = function (val) {
-    const satoshis = val * 100000000;
-    return satoshis;
+    return val * 100000000;
 };
 const masterKey = new hd.HDPrivateKey("tprv8koNFULfCFjfqeDg9QTcfyxkBisnvPQnnmRqPDrPp1LvdBggx6xD" +
     "SyA94cjpAXS7ccGhsQ7w6q7Y9Ku31e1eTDztU49LVBz9B1sCDoeE6Jc");
@@ -87,7 +88,27 @@ const checkSegwit = function (solvers) {
     }
     return segwit;
 };
-const spendToP2pkh = function (outputs, solvers, amount) {
+const spendToP2pk = function (outputs, solvers, amount, sequence = new Sequence(0)) {
+    return new Promise((resolve, reject) => {
+        if (solvers.length !== outputs.length) throw "A solver for each output must be provided";
+        var txouts = [];
+        var txins = [];
+
+        var segwit = checkSegwit(solvers);
+        _.forEach(outputs, out => {
+            var script = new scripts.P2pkScript(masterKey.privkey.getPublic());
+            txouts.push(new Output(amount, script));
+            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), sequence));
+        });
+
+        var tx = new MutableTransaction(2, txins, txouts, new Locktime(0), segwit);
+        var spent = tx.spend(_.map(outputs, output => output.out), solvers);
+        rpcclient.sendRawTransaction(spent.toHex())
+            .then(() => resolve([formatOutputs(spent), _.map(spent.outputs, out => new P2pkSolver(masterKey.privkey))]))
+            .catch(err => reject(err));
+    });
+};
+const spendToP2pkh = function (outputs, solvers, amount, sequence = new Sequence(0)) {
     return new Promise((resolve, reject) => {
         if (solvers.length !== outputs.length) throw "A solver for each output must be provided";
         var txouts = [];
@@ -98,20 +119,18 @@ const spendToP2pkh = function (outputs, solvers, amount) {
             var script = new scripts.P2pkhScript(masterKey.privkey.getPublic());
 
             txouts.push(new Output(amount, script));
-            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), new Sequence(0)));
+            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), sequence));
         });
 
         var tx = new MutableTransaction(2, txins, txouts, new Locktime(0), segwit);
         var spent = tx.spend(_.map(outputs, output => output.out), solvers);
-
         rpcclient.sendRawTransaction(spent.toHex())
             .then(() => resolve([formatOutputs(spent), _.map(spent.outputs, out => new P2pkhSolver(masterKey.privkey))]))
             .catch(err => reject(err));
-
     });
 };
 
-const spendToMultisig = function (outputs, solvers, amount) {
+const spendToMultisig = function (outputs, solvers, amount, sequence = new Sequence(0)) {
     return new Promise((resolve, reject) => {
         if (solvers.length !== outputs.length) throw "A solver for each output must be provided";
 
@@ -128,7 +147,7 @@ const spendToMultisig = function (outputs, solvers, amount) {
                 privkey3.getPublic(),
                 3]);
             txouts.push(new Output(amount, script));
-            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), new Sequence(0)));
+            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), sequence));
         });
 
         var tx = new MutableTransaction(2, txins, txouts, new Locktime(0), segwit);
@@ -140,7 +159,7 @@ const spendToMultisig = function (outputs, solvers, amount) {
     });
 };
 
-const spendToIfElse = function (outputs, solvers, amount, branch) {
+const spendToIfElse = function (outputs, solvers, amount, branch, sequence = new Sequence(0)) {
     return new Promise((resolve, reject) => {
         if (solvers.length !== outputs.length) throw "A solver for each output must be provided";
         if (outputs.length !== 2) throw "Invalid data length to build if-else outputs";
@@ -151,7 +170,7 @@ const spendToIfElse = function (outputs, solvers, amount, branch) {
         var else_branch = outputs[1].out.scriptPubKey;
         var script = new scripts.IfElseScript([if_branch, else_branch]);
         _.forEach(outputs, out => {
-            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), new Sequence(0)));
+            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), sequence));
         });
         txouts.push(new Output(amount, script));
         var tx = new MutableTransaction(2, txins, txouts, new Locktime(0), segwit);
@@ -164,26 +183,26 @@ const spendToIfElse = function (outputs, solvers, amount, branch) {
     });
 };
 
-const spendToRtl = function (outputs, solvers, amount, sequence) {
+const spendToRtl = function (outputs, solvers, amount, script_sequence, sequence = new Sequence(0)) {
     return new Promise((resolve, reject) => {
         if (solvers.length !== outputs.length) throw "A solver for each output must be provided";
         var txouts = [];
         var txins = [];
         var segwit = checkSegwit(solvers);
         _.forEach(outputs, out => {
-            var script = new scripts.RelativeTimelockScript([out.out.scriptPubKey, sequence]);
+            var script = new scripts.RelativeTimelockScript([out.out.scriptPubKey, script_sequence]);
             txouts.push(new Output(amount, script));
-            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), new Sequence(0)));
+            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), sequence));
         });
         var tx = new MutableTransaction(2, txins, txouts, new Locktime(0), segwit);
         var spent = tx.spend(_.map(outputs, output => output.out), solvers);
         rpcclient.sendRawTransaction(spent.toHex())
             .then(() => resolve([formatOutputs(spent), _.map(spent.outputs, (out, index) =>
-                new RtlSolver(solvers[index]))]))
+                new RtlSolver(solvers[index])), script_sequence]))
             .catch(err => reject(err));
     });
 };
-const spendToP2sh = function (outputs, solvers, amount) {
+const spendToP2sh = function (outputs, solvers, amount, sequence = new Sequence(0)) {
     return new Promise((resolve, reject) => {
         if (solvers.length !== outputs.length) throw "A solver for each output must be provided";
         var txouts = [];
@@ -193,7 +212,7 @@ const spendToP2sh = function (outputs, solvers, amount) {
         _.forEach(outputs, out => {
             var script = new scripts.P2shScript(out.out.scriptPubKey);
             txouts.push(new Output(amount, script));
-            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), new Sequence(0)));
+            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), sequence));
         });
 
         var tx = new MutableTransaction(2, txins, txouts, new Locktime(0), segwit);
@@ -205,7 +224,7 @@ const spendToP2sh = function (outputs, solvers, amount) {
             .catch(err => reject(err));
     });
 };
-const spendToP2wpkhV0 = function (outputs, solvers, amount) {
+const spendToP2wpkhV0 = function (outputs, solvers, amount, sequence = new Sequence(0)) {
     return new Promise((resolve, reject) => {
         if (solvers.length !== outputs.length) throw "A solver for each output must be provided";
         var txouts = [];
@@ -214,7 +233,7 @@ const spendToP2wpkhV0 = function (outputs, solvers, amount) {
         _.forEach(outputs, out => {
             var script = new scripts.P2wpkhV0Script(masterKey.privkey.getPublic());
             txouts.push(new Output(amount, script));
-            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), new Sequence(0)));
+            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), sequence));
         });
         var tx = new MutableTransaction(2, txins, txouts, new Locktime(0), segwit);
         var spent = tx.spend(_.map(outputs, output => output.out), solvers);
@@ -224,7 +243,7 @@ const spendToP2wpkhV0 = function (outputs, solvers, amount) {
             .catch(err => reject(err));
     });
 };
-const spendToP2wshV0 = function (outputs, solvers, amount) {
+const spendToP2wshV0 = function (outputs, solvers, amount, sequence = new Sequence(0)) {
     return new Promise((resolve, reject) => {
         if (solvers.length !== outputs.length) throw "A solver for each output must be provided";
         var txouts = [];
@@ -233,7 +252,7 @@ const spendToP2wshV0 = function (outputs, solvers, amount) {
         _.forEach(outputs, out => {
             var script = new scripts.P2wshV0Script(out.out.scriptPubKey);
             txouts.push(new Output(amount, script));
-            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), new Sequence(0)));
+            txins.push(new Input(out.txid, out.n, scripts.ScriptSig.empty(), sequence));
         });
         var tx = new MutableTransaction(2, txins, txouts, new Locktime(0), segwit);
         var spent = tx.spend(_.map(outputs, output => output.out), solvers);
@@ -252,7 +271,10 @@ const fundAddresses = function () {
                     rpcclient.getRawTransaction(txid).then(tx_raw => {
                         var tx = Transaction.fromHex(tx_raw);
                         initUtxo.push(formatInitOutputs(tx));
-                        if (initUtxo.length === receivingAddresses.length) resolve();
+                        if (initUtxo.length === receivingAddresses.length) {
+                            initUtxo = _.flatten(initUtxo);
+                            resolve();
+                        }
                     }).catch(err => reject(err));
                 }).catch(err => reject(err));
             }
@@ -285,14 +307,25 @@ describe("Integration Test", function () {
         assert.equal(initUtxo.length, receivingAddresses.length);
     });
 });
+describe("btcnodejs P2pk signature algorithm", function () {
+    this.timeout(10000);
+    setup();
+    it("can spend p2pk transactions", (done) => {
+        spendToP2pk(initUtxo, initSolvers, SATOSHIS(9))
+            .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(8)))
+            .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
+            .then(() => done())
+            .catch(err => done(err));
+    });
+});
+
 describe("btcnodejs If-Else signature algorithm", function () {
     this.timeout(10000);
     setup();
-    it("can spend if {multisig} else {p2pkh} and if {p2pkk} else {multisig} outputs", (done) => {
-
-        spendToMultisig(_.flatten(initUtxo).slice(0, 2), initSolvers.slice(0, 2), SATOSHIS(9))
+    it("can spend if {multisig} else {p2pkh} and if {p2pkh} else {multisig} outputs", (done) => {
+        spendToMultisig(initUtxo.slice(0, 2), initSolvers.slice(0, 2), SATOSHIS(9))
             .then(([multisig_outs, multisig_solvers]) => {
-                spendToP2pkh(_.flatten(initUtxo).slice(2, 4), initSolvers.slice(2, 4), SATOSHIS(9))
+                spendToP2pkh(initUtxo.slice(2, 4), initSolvers.slice(2, 4), SATOSHIS(9))
                     .then(([p2pkh_outs, p2pkh_solvers]) => {
                         spendToIfElse([p2pkh_outs[0], multisig_outs[1]], [p2pkh_solvers[0], multisig_solvers[1]], SATOSHIS(8), 0)
                             .then(([if_else_out, if_else_solver]) => {
@@ -307,12 +340,49 @@ describe("btcnodejs If-Else signature algorithm", function () {
                     });
             });
     });
+    it("can spend if {p2pkh} else {rtl} (on both branches) transactions", (done) => {
+        spendToRtl(initUtxo.slice(0, 2), initSolvers.slice(0, 2), SATOSHIS(9), new Sequence(0))
+            .then(([rtl_outs, rtl_solvers, rtl_sequence]) => {
+                spendToP2pkh(initUtxo.slice(2, 4), initSolvers.slice(2, 4), SATOSHIS(9))
+                    .then(([p2pkh_outs, p2pkh_solvers]) => {
+                        spendToIfElse([rtl_outs[0], p2pkh_outs[0]], [rtl_solvers[0], p2pkh_solvers[0]], SATOSHIS(8), 0)
+                            .then(([if_else_out, if_else_solver]) => {
+                                spendToIfElse([rtl_outs[1], p2pkh_outs[1]], [rtl_solvers[1], p2pkh_solvers[1]], SATOSHIS(8), 1)
+                                    .then(([if_else_out2, if_else_solver2]) => {
+                                        spendToP2pkh(_.flatten([if_else_out, if_else_out2]), _.flatten([if_else_solver, if_else_solver2]), SATOSHIS(7))
+                                            .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
+                                            .then(() => done())
+                                            .catch(err => done(err));
+                                    });
+                            });
+                    });
+            });
+    });
+    it("can spend if {p2pk} else {multisig} (on both branches) transactions", (done) => {
+        spendToMultisig(initUtxo.slice(0, 2), initSolvers.slice(0, 2), SATOSHIS(9))
+            .then(([multisig_outs, multisig_solvers]) => {
+                spendToP2pk(initUtxo.slice(2, 4), initSolvers.slice(2, 4), SATOSHIS(9))
+                    .then(([p2pk_outs, p2pk_solvers]) => {
+                        spendToIfElse([p2pk_outs[0], multisig_outs[1]], [p2pk_solvers[0], multisig_solvers[1]], SATOSHIS(8), 0)
+                            .then(([if_else_out, if_else_solver]) => {
+                                spendToIfElse([p2pk_outs[1], multisig_outs[0]], [p2pk_solvers[1], multisig_solvers[0]], SATOSHIS(7), 1)
+                                    .then(([if_else_out2, if_else_solver2]) => {
+                                        spendToP2pkh(_.flatten([if_else_out, if_else_out2]), _.flatten([if_else_solver, if_else_solver2]), SATOSHIS(7))
+                                            .then(([outs, solvers]) => assert(outs.length === solvers.length))
+                                            .then(() => done())
+                                            .catch(err => done(err));
+                                    });
+                            });
+                    });
+            });
+    });
+
 });
 describe("btcnodejs P2pkh signature algorithm", function () {
     this.timeout(10000);
     setup();
     it("can spend p2pkh transactions", (done) => {
-        spendToP2pkh(_.flatten(initUtxo), initSolvers, SATOSHIS(9))
+        spendToP2pkh(initUtxo, initSolvers, SATOSHIS(9))
             .then(([outs, solvers]) => spendToP2pkh(outs, solvers))
             .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
             .then(() => done())
@@ -324,7 +394,7 @@ describe("btcnodejs Multisig signature algorithm", function () {
     this.timeout(10000);
     setup();
     it("can spend multisig transactions", (done) => {
-        spendToMultisig(_.flatten(initUtxo), initSolvers, SATOSHIS(9))
+        spendToMultisig(initUtxo, initSolvers, SATOSHIS(9))
             .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(8)))
             .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
             .then(() => done())
@@ -335,13 +405,42 @@ describe("btcnodejs Multisig signature algorithm", function () {
 describe("btcnodejs Rtl signature algorithm", function () {
     this.timeout(10000);
     setup();
-    it("can spend rtl transactions", (done) => {
-        spendToRtl(_.flatten(initUtxo), initSolvers, SATOSHIS(9), new Sequence(0))
+
+    it("can spend rtl over p2pkh transactions", (done) => {
+        spendToRtl(initUtxo, initSolvers, SATOSHIS(9), new Sequence(0))
             .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(8)))
             .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
             .then(() => done())
             .catch(err => done(err));
     });
+
+    it("can spend rtl (2) over p2pkh transactions", (done) => {
+        spendToRtl(initUtxo, initSolvers, SATOSHIS(9), new Sequence(2))
+            .then(([outs, solvers, sequence]) => {
+                rpcclient.generateBlocks(3)
+                    .then(() => spendToP2pkh(outs, solvers, SATOSHIS(8), sequence))
+                    .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
+                    .then(() => done())
+                    .catch(err => done(err));
+            });
+    });
+    it("can spend rtl over multisig transactions", (done) => {
+        spendToMultisig(initUtxo, initSolvers, SATOSHIS(9))
+            .then(([outs, solvers]) => spendToRtl(outs, solvers, SATOSHIS(8), new Sequence(0)))
+            .then(([outs, solvers]) => spendToP2pkh(outs, solvers), SATOSHIS(7))
+            .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
+            .then(() => done())
+            .catch(err => done(err));
+    });
+    it("can spend rtl over p2pk transactions", (done) => {
+        spendToP2pk(initUtxo, initSolvers, SATOSHIS(9))
+            .then(([outs, solvers]) => spendToRtl(outs, solvers, SATOSHIS(8), new Sequence(0)))
+            .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(7)))
+            .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
+            .then(() => done())
+            .catch(err => done(err));
+    });
+
 });
 
 
@@ -349,15 +448,23 @@ describe("btcnodejs P2sh signature algorithm", function () {
     this.timeout(10000);
     setup();
 
+    it("can spend p2sh over p2pk transactions", (done) => {
+        spendToP2pk(initUtxo, initSolvers, SATOSHIS(9))
+            .then(([outs, solvers]) => spendToP2sh(outs, solvers, SATOSHIS(8)))
+            .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(7)))
+            .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
+            .then(() => done())
+            .catch(err => done(err));
+    });
     it("can spend p2sh over p2pkh transactions", (done) => {
-        spendToP2sh(_.flatten(initUtxo), initSolvers, SATOSHIS(9))
+        spendToP2sh(initUtxo, initSolvers, SATOSHIS(9))
             .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(8)))
             .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
             .then(() => done())
             .catch(err => done(err));
     });
     it("can spend p2sh over if-else transactions", (done) => {
-        spendToIfElse(_.flatten(initUtxo).slice(0, 2), initSolvers.slice(0, 2), SATOSHIS(9), 0)
+        spendToIfElse(initUtxo.slice(0, 2), initSolvers.slice(0, 2), SATOSHIS(9), 0)
             .then(([if_else_out, if_else_solver]) => spendToP2sh(if_else_out, if_else_solver, SATOSHIS(8)))
             .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(7)))
             .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
@@ -365,7 +472,7 @@ describe("btcnodejs P2sh signature algorithm", function () {
             .catch(err => done(err));
     });
     it("can spend p2sh over rtl transactions", (done) => {
-        spendToRtl(_.flatten(initUtxo), initSolvers, SATOSHIS(9), new Sequence(0))
+        spendToRtl(initUtxo, initSolvers, SATOSHIS(9), new Sequence(0))
             .then(([outs, solvers]) => spendToP2sh(outs, solvers, SATOSHIS(8)))
             .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(7)))
             .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
@@ -374,7 +481,7 @@ describe("btcnodejs P2sh signature algorithm", function () {
     });
 
     it("can spend p2sh over multisig transactions", (done) => {
-        spendToMultisig(_.flatten(initUtxo), initSolvers, SATOSHIS(9))
+        spendToMultisig(initUtxo, initSolvers, SATOSHIS(9))
             .then(([outs, solvers]) => spendToP2sh(outs, solvers, SATOSHIS(8)))
             .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(7)))
             .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
@@ -383,10 +490,18 @@ describe("btcnodejs P2sh signature algorithm", function () {
     });
 
     it("can spend p2sh over p2wpkh transactions", (done) => {
-        spendToP2wpkhV0(_.flatten(initUtxo), initSolvers, SATOSHIS(9))
+        spendToP2wpkhV0(initUtxo, initSolvers, SATOSHIS(8))
+            .then(([outs, solvers]) => spendToP2sh(outs, solvers, SATOSHIS(7)))
+            .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(6)))
+            .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
+            .then(() => done())
+            .catch(err => done(err));
+    });
+    it("can spend p2sh over p2wsh transactions", (done) => {
+        spendToP2wshV0(initUtxo, initSolvers, SATOSHIS(9))
             .then(([outs, solvers]) => spendToP2sh(outs, solvers, SATOSHIS(8)))
             .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(7)))
-            .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
+            .then(([outs, solvers]) => assert(outs.length, solvers.length))
             .then(() => done())
             .catch(err => done(err));
     });
@@ -397,41 +512,61 @@ describe("btcnodejs P2sh signature algorithm", function () {
 describe("btcnodejs P2wpkhV0 signature algorithm", function () {
     this.timeout(10000);
     setup();
-    it("can spend p2wpkh over p2pkh transactions", (done) => {
-        spendToP2wpkhV0(_.flatten(initUtxo), initSolvers, SATOSHIS(9))
+    it("can spend p2wpkh transactions", (done) => {
+        spendToP2wpkhV0(initUtxo, initSolvers, SATOSHIS(9))
             .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(8)))
             .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
             .then(() => done())
             .catch(err => done(err));
     });
 });
+
 describe("btcnodejs P2wshV0 signature algorithm", function () {
     this.timeout(10000);
     setup();
+
+    it("can spend p2wshv0 over p2pk transactions", (done) => {
+        spendToP2pk(initUtxo, initSolvers, SATOSHIS(9))
+            .then(([outs, solvers]) => spendToP2wshV0(outs, solvers, SATOSHIS(8)))
+            .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(7)))
+            .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
+            .then(() => done())
+            .catch(err => done(err));
+    });
     it("can spend p2wshv0 over p2pkh transactions", (done) => {
-        spendToP2wshV0(_.flatten(initUtxo), initSolvers, SATOSHIS(9))
+        spendToP2wshV0(initUtxo, initSolvers, SATOSHIS(9))
             .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(8)))
             .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
             .then(() => done())
             .catch(err => done(err));
     });
-    it("can spend p2wshv0 over ");
-});
-module.exports = {};
 
-/*
-var script = new scripts.P2pkhScript(receiving_keys[0].privkey.getPublic());
-        var txout = new Output(1, script);
-        var txin = new Input(init_utxo[0].txid, 0, scripts.ScriptSig.empty(), new transactions.Sequence(0));
-        var tx = new MutableTransaction(2, [txin], [txout], new Locktime(0));
 
-        var spent = tx.spendClassic([tx.outputs[0]], [new solvers.P2pkhSolver(receiving_keys[0].privkey)]);
-        rpcclient.sendRawTransaction(spent.toHex())
-            .then(txid => assert.equal(txid, spent.txid))
+    it("can spend p2wshv0 over multisig transactions", (done) => {
+        spendToMultisig(initUtxo, initSolvers, SATOSHIS(9))
+            .then(([outs, solvers]) => spendToP2wshV0(outs, solvers, SATOSHIS(8)))
+            .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(7)))
+            .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
             .then(() => done())
-            .catch(err => console.log(err));
+            .catch(err => done(err));
+    });
 
- spendToIfElse(
-                                [p2pkh_outs[1], multisig_outs[1]],
-                                [p2pkh_solvers[1], multisig_solvers[1]], SATOSHIS(8), 1).then(([if_else_out2, if_else_solver2]) => {
- */
+    it("can spend p2wshv0 over IfElse transactions", (done) => {
+        spendToIfElse(initUtxo.slice(0, 2), initSolvers.slice(0, 2), SATOSHIS(9), 0)
+            .then(([if_else_out, if_else_solver]) => spendToP2wshV0(if_else_out, if_else_solver, SATOSHIS(8)))
+            .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(7)))
+            .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
+            .then(() => done())
+            .catch(err => done(err));
+    });
+    it("can spend p2wshv0 over Rtl transactions", (done) => {
+        spendToRtl(initUtxo, initSolvers, SATOSHIS(9), new Sequence(0))
+            .then(([outs, solvers]) => spendToP2wshV0(outs, solvers, SATOSHIS(8)))
+            .then(([outs, solvers]) => spendToP2pkh(outs, solvers, SATOSHIS(7)))
+            .then(([outs, solvers]) => assert.equal(outs.length, solvers.length))
+            .then(() => done())
+            .catch(err => done(err));
+    });
+
+});
+

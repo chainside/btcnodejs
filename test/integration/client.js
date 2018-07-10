@@ -4,10 +4,12 @@ const config = require("./config");
 const client = new RpcClient(config);
 const exec = require("child_process").exec;
 
+const TEST_PATH = "";
+
 function runNodes() {
     return new Promise((resolve, reject) => {
-        exec("bitcoind --conf={BASE_PATH}/btcnodejs/test/integration/test_node/bitcoin.conf " +
-            "--datadir=/home/doze/Projects/btcnodejs/test/integration/test_node", (err, stdout, stderr) => {
+        exec("bitcoind --conf=" + TEST_PATH + "/test_node/bitcoin.conf " +
+            "--datadir=" + TEST_PATH + "/test_node", (err, stdout, stderr) => {
             if (err !== null) reject(err);
             else setTimeout(resolve, 2000);
         });
@@ -16,7 +18,7 @@ function runNodes() {
 
 function stopNodes() {
     return new Promise((resolve, reject) => {
-        exec("bitcoin-cli --conf={BASE_PATH}/btcnodejs/test/integration/test_node/bitcoin.conf stop", (err, stdout, stderr) => {
+        exec("bitcoin-cli --conf=" + TEST_PATH + "/test_node/bitcoin.conf stop", (err, stdout, stderr) => {
             if (err !== null) reject(err);
             else setTimeout(resolve, 2000);
         });
@@ -25,7 +27,7 @@ function stopNodes() {
 
 function clearNodes() {
     return new Promise((resolve, reject) => {
-        exec("rm -r {BASE_PATH}/btcnodejs/test/integration/test_node/regtest", (err, stdout, stderr) => {
+        exec("rm -r " + TEST_PATH + "/test_node/regtest", (err, stdout, stderr) => {
             if (err !== null) reject(err);
             else setTimeout(resolve, 2000);
         });
