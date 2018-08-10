@@ -1308,7 +1308,7 @@ describe("Keys", function () {
                 const prk = crypto.Privatekey.fromHex(signatures[i]["key"]);
                 const pub = prk.getPublic();
                 const valid = pub.verify(signatures[i]["message"], signatures[i]["signature"]);
-                assert.equal(valid, true);
+                assert(valid);
             }
         });
     });

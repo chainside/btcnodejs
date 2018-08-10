@@ -202,6 +202,18 @@ const spendToRtl = function (outputs, solvers, amount, script_sequence, sequence
             .catch(err => reject(err));
     });
 };
+const spendToTl = function (outputs, solvers, amount, script_timelock, sequence = new Sequence(0)) {
+    return new Promise((resolve, reject) => {
+        if (solvers.length !== outputs.length) throw "A solver for each output must be provided";
+        var txouts = [];
+        var txins = [];
+        var segwit = checkSegwit(solvers);
+        _.forEach(outputs, out => {
+            var script = new scripts.TimelockScript(([out.out.scriptPubKey, script_timelock]));
+
+        });
+    });
+};
 const spendToP2sh = function (outputs, solvers, amount, sequence = new Sequence(0)) {
     return new Promise((resolve, reject) => {
         if (solvers.length !== outputs.length) throw "A solver for each output must be provided";
