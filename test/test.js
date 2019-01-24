@@ -830,6 +830,24 @@ describe("Structs", function () {
     });
 });
 describe("Scripts", function () {
+    describe.only("Script", function () {
+        it("compiles asm to hex", function () {
+            for (var key in test_scripts) {
+                if (test_scripts.hasOwnProperty(key)) {
+                    for (var i = 0; i < test_scripts[key].length; i++) {
+                        if (test_scripts[key][i].hasOwnProperty("asm")) {
+                            const hex = scripts.Script.compileToHex(test_scripts[key][i]["asm"]);
+                            assert.equal(hex, test_scripts[key][i]["hex"]);
+                        }
+                    }
+                }
+            }
+            for (var i = 0; i < scriptsigs.length; i++) {
+                const hex = scripts.Script.compileToHex(scriptsigs[i]["asm"]);
+                assert.equal(hex, scriptsigs[i]["hex"]);
+            }
+        });
+    });
     describe("ScriptSig", function () {
         it("can be initialized from hex and converted to asm", function () {
             for (var i = 0; i < scriptsigs.length; i++) {
