@@ -24,10 +24,10 @@
     "sha.js": "^2.4.8"
   },
   "devDependencies": {
-    "mocha": "^3.5.3",
     "bitcoind-rpc": "^0.7.1",
+    "debug": ">=2.6.9",
     "growl": ">=1.10.0",
-    "debug": ">=2.6.9"
+    "mocha": "5.2.0"
   },
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha test/test.js",
