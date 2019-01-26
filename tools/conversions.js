@@ -24,6 +24,10 @@ function numToVarInt(num) {
     else return [253].concat(numToBytes(num, 8));
 }
 
+function numToHex(num) {
+    return bytesToHex(numToBytes(num));
+}
+
 function hexToBytes(hex) {
     for (var bytes = [], c = 0; c < hex.length; c += 2)
         bytes.push(parseInt(hex.substr(c, 2), 16));
@@ -78,5 +82,6 @@ module.exports = {
     bytesToHex,
     bnmodexp,
     bytesLen,
-    hexToBinary
+    hexToBinary,
+    numToHex
 };

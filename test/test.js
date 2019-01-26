@@ -1362,39 +1362,59 @@ describe("Keys", function () {
     describe("HDPrivateKey", function () {
         it("can derive its childs according to bip32", function () {
             let masterpriv, masterpub;
+
             for (var i = 0; i < hd_keys.length; i++) {
                 if (hd_keys[i]["path"] === "m") {
+                    if (hd_keys[i]["prv"].startsWith("x")) {
+                        net.setup("mainnet", true);
+                    }
+                    else {
+                        net.setup("testnet", true);
+                    }
                     masterpriv = new hd.HDPrivateKey(hd_keys[i]["prv"]);
                     masterpub = new hd.HDPublicKey(hd_keys[i]["pub"]);
                     continue;
                 }
                 assert.equal(
-                    masterpriv.derive(hd_keys[i]["path"])._bckey.toString(),
+                    masterpriv.derive(hd_keys[i]["path"]).toString(),
                     hd_keys[i]["prv"]
                 );
             }
+            net.setup("testnet", true);
         });
         it("can generate the corresponding HDPublicKey", function () {
             for (var i = 0; i < hd_keys.length; i++) {
+                if (hd_keys[i]["prv"].startsWith("x")) {
+                    net.setup("mainnet", true);
+                }
+                else {
+                    net.setup("testnet", true);
+                }
                 const priv = new hd.HDPrivateKey(hd_keys[i]["prv"]);
                 const pub = priv.getPublic();
                 assert(pub instanceof hd.HDPublicKey);
-                assert.equal(pub._bckey.toString(), hd_keys[i]["pub"]);
+                assert.equal(pub.toString(), hd_keys[i]["pub"]);
             }
+            net.setup("testnet", true);
         });
         it("can be generated from a seed", function () {
-            net.setup("mainnet", true);
             for (let i = 0; i < hd_keys.length; i++) {
                 if (hd_keys[i]["path"] === "m") {
+                    if (hd_keys[i]["prv"].startsWith("x")) {
+                        net.setup("mainnet", true);
+                    }
+                    else {
+                        net.setup("testnet", true);
+                    }
                     const priv = hd.HDPrivateKey.fromSeed(hd_keys[i]["seed"]);
-                    assert.equal(priv._bckey.toString(), hd_keys[i]["prv"]);
-                    assert.equal(priv.getPublic()._bckey.toString(), hd_keys[i]["pub"]);
+                    assert.equal(priv.toString(), hd_keys[i]["prv"]);
+                    assert.equal(priv.getPublic().toString(), hd_keys[i]["pub"]);
                 }
             }
             for (let i = 0; i < bip39_seeds.length; i++) {
                 const seed = bip39_seeds[i].seed;
                 const priv = hd.HDPrivateKey.fromSeed(seed);
-                assert.equal(priv._bckey.toString(), bip39_seeds[i].key);
+                assert.equal(priv.toString(), bip39_seeds[i].key);
             }
 
             net.setup("testnet", true);
@@ -1408,14 +1428,36 @@ describe("Keys", function () {
                 "m/0/2147483647/1/2147483646/2",
                 "m/156131385/44645489/4865448/4896853"
             ];
+            if (hd_keys[0]["prv"].startsWith("x")) {
+                net.setup("mainnet", true);
+            }
+            else {
+                net.setup("testnet", true);
+            }
             const masterpriv = new hd.HDPrivateKey(hd_keys[0]["prv"]);
             const masterpub = new hd.HDPublicKey(hd_keys[0]["pub"]);
+
             _.forEach(paths, path => {
                 let newpub = masterpub.derive(path);
                 let newpriv = masterpriv.derive(path);
 
-                assert.equal(newpriv.getPublic()._bckey.toString(), newpub._bckey.toString());
+                assert.equal(newpriv.getPublic().toString(), newpub.toString());
+                assert.equal(newpriv.depth, newpriv._bckey.depth);
+                assert.equal(newpriv.chainCode, newpriv._bckey.chainCode);
+                assert.equal(newpriv.parentFingerPrint.toHex(), $.numToHex(newpriv._bckey.parentFingerprint));
+                assert.equal(newpriv.fingerPrint.toHex(), $.bytesToHex(newpriv._bckey.getFingerprint()));
+                assert.equal(newpriv.childIndex, newpriv._bckey.index);
+
+
+                assert.equal(newpub.depth, newpub._bckey.depth);
+                assert.equal(newpub.chainCode, newpub._bckey.chainCode);
+                assert.equal(newpub.parentFingerPrint.toHex(), $.numToHex(newpub._bckey.parentFingerprint));
+                assert.equal(newpub.fingerPrint.toHex(), $.bytesToHex(newpub._bckey.getFingerprint()));
+                assert.equal(newpub.childIndex, newpub._bckey.index);
+
+
             });
+            net.setup("testnet", true);
         });
     });
     describe("Bip39 Module", function () {
