@@ -11,7 +11,6 @@
     "arraybuffer-to-buffer": "^0.0.4",
     "assert": "^1.4.1",
     "bitcoinjs-lib": "^3.2.0",
-    "bitcore-lib": "^0.14.0",
     "bn.js": "^4.11.8",
     "brfs": "^1.4.3",
     "bs58": "^4.0.1",
@@ -26,7 +25,9 @@
   },
   "devDependencies": {
     "mocha": "^3.5.3",
-    "bitcoind-rpc": "^0.7.1"
+    "bitcoind-rpc": "^0.7.1",
+    "growl": ">=1.10.0",
+    "debug": ">=2.6.9"
   },
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha test/test.js",

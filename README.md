@@ -1,5 +1,5 @@
 <p>
-<img src="https://www.chainside.net/images/logo.png" alt="chainside" width="80">
+<img src="https://www.chainside.net/wp-content/themes/chainside2018/assets/favicon//favicon-192.png" alt="chainside" width="80">
 <br \><br \>
 developed with :heart: by <a href="https://www.chainside.net">chainside</a>
 </p>
@@ -10,7 +10,7 @@ developed with :heart: by <a href="https://www.chainside.net">chainside</a>
 
 **This library is a work in progress and its usage in a production environment is highly discouraged. Also, as long as the version is 0.\*, API breaking changes might occur**
 
-Some of the functionalities are a wrapping around  [bitcore-lib](https://github.com/bitpay/bitcore-lib) and  [bitcoinjs-lib](https://github.com/bitcoinjs/bitcoinjs-lib), and their development is still in progress.
+Some of the functionalities are a wrapping around  [bitcoinjs-lib](https://github.com/bitcoinjs/bitcoinjs-lib), and their development is still in progress.
 
 It makes usage of [bytebuffer.js](https://github.com/dcodeIO/bytebuffer.js) for representing most of the data structures
 
@@ -865,7 +865,7 @@ Returns the Publickey body
 
 ## HD
 
-This library exposes functionalities to manage Hierarchical deterministic keys. It makes usage of [bitcore-lib](https://github.com/bitpay/bitcore-lib) for some functionalities
+This library exposes functionalities to manage Hierarchical deterministic keys. It makes usage of [bitcoinjs-lib](https://github.com/bitcoinjs/bitcoinjs-lib) for some functionalities
 
 ## `btcnodejs.HDPrivateKey`
 
