@@ -25,7 +25,9 @@
   },
   "devDependencies": {
     "mocha": "^3.5.3",
-    "bitcoind-rpc": "^0.7.1"
+    "bitcoind-rpc": "^0.7.1",
+    "growl": ">=1.10.0",
+    "debug": ">=2.6.9"
   },
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha test/test.js",
