@@ -1369,7 +1369,7 @@ describe("Keys", function () {
                     continue;
                 }
                 assert.equal(
-                    masterpriv.derive(hd_keys[i]["path"])._bckey.toString(),
+                    masterpriv.derive(hd_keys[i]["path"]).toString(),
                     hd_keys[i]["prv"]
                 );
             }
@@ -1379,7 +1379,7 @@ describe("Keys", function () {
                 const priv = new hd.HDPrivateKey(hd_keys[i]["prv"]);
                 const pub = priv.getPublic();
                 assert(pub instanceof hd.HDPublicKey);
-                assert.equal(pub._bckey.toString(), hd_keys[i]["pub"]);
+                assert.equal(pub.toString(), hd_keys[i]["pub"]);
             }
         });
         it("can be generated from a seed", function () {
@@ -1387,14 +1387,14 @@ describe("Keys", function () {
             for (let i = 0; i < hd_keys.length; i++) {
                 if (hd_keys[i]["path"] === "m") {
                     const priv = hd.HDPrivateKey.fromSeed(hd_keys[i]["seed"]);
-                    assert.equal(priv._bckey.toString(), hd_keys[i]["prv"]);
-                    assert.equal(priv.getPublic()._bckey.toString(), hd_keys[i]["pub"]);
+                    assert.equal(priv.toString(), hd_keys[i]["prv"]);
+                    assert.equal(priv.getPublic().toString(), hd_keys[i]["pub"]);
                 }
             }
             for (let i = 0; i < bip39_seeds.length; i++) {
                 const seed = bip39_seeds[i].seed;
                 const priv = hd.HDPrivateKey.fromSeed(seed);
-                assert.equal(priv._bckey.toString(), bip39_seeds[i].key);
+                assert.equal(priv.toString(), bip39_seeds[i].key);
             }
 
             net.setup("testnet", true);
@@ -1414,7 +1414,7 @@ describe("Keys", function () {
                 let newpub = masterpub.derive(path);
                 let newpriv = masterpriv.derive(path);
 
-                assert.equal(newpriv.getPublic()._bckey.toString(), newpub._bckey.toString());
+                assert.equal(newpriv.getPublic().toString(), newpub.toString());
             });
         });
     });
