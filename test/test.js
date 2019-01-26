@@ -902,7 +902,7 @@ describe("Structs", function () {
     });
 });
 describe("Scripts", function () {
-    describe.only("Script", function () {
+    describe("Script", function () {
         it("compiles asm to hex", function () {
             for (var key in test_scripts) {
                 if (test_scripts.hasOwnProperty(key)) {
