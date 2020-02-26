@@ -1,6 +1,6 @@
 {
   "name": "btcnodejs",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Nodejs bitcoin library which provides tools to handle Bitcoin data structures in a simple fashion",
   "main": "./lib/index.js",
   "directories": {
